@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>LevAI ROI Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #0b1120;
+      --card-bg: #020617;
+      --card-alt: #020617;
+      --border-subtle: #1f2937;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --accent: #38bdf8; /* tweak to match your button color if you want */
+      --accent-soft: rgba(56, 189, 248, 0.1);
+      --danger: #f97373;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.55);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+      background: radial-gradient(circle at top left, #020617 0, #020617 40%, #020617 70%, #000 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+    }
+
+    .app {
+      max-width: 1120px;
+      width: 100%;
+      margin: 32px 16px;
+      padding: 24px;
+      background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.08), transparent 55%),
+                  radial-gradient(circle at bottom left, rgba(34, 197, 94, 0.06), transparent 55%),
+                  #020617cc;
+      border-radius: 24px;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(16px);
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    header {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    header h1 {
+      font-size: 1.6rem;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    header p {
+      margin: 0;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+      gap: 24px;
+      align-items: flex-start;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    /* Left: form */
+
+    .panel {
+      background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.9));
+      border-radius: var(--radius-xl);
+      padding: 18px 18px 20px;
+      border: 1px solid rgba(31, 41, 55, 0.9);
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .panel-header h2 {
+      font-size: 1rem;
+      margin: 0;
+    }
+
+    .pill {
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .field-group {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px 16px;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 700px) {
+      .field-group {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .field label {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #e5e7eb;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .field label span.hint {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .field input,
+    .field select {
+      padding: 7px 9px;
+      border-radius: 10px;
+      border: 1px solid rgba(51, 65, 85, 0.9);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text-main);
+      font-size: 0.85rem;
+      outline: none;
+      width: 100%;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.5);
+    }
+
+    .field small {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .row-full {
+      grid-column: 1 / -1;
+    }
+
+    .button-row {
+      margin-top: 14px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+    }
+
+    button.primary {
+      border: none;
+      border-radius: 999px;
+      padding: 8px 18px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      background: radial-gradient(circle at top left, #38bdf8, #0ea5e9);
+      color: #0b1120;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 12px 25px rgba(56, 189, 248, 0.45);
+      transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.06s ease;
+    }
+
+    button.primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 30px rgba(56, 189, 248, 0.5);
+      filter: brightness(1.03);
+    }
+
+    button.primary:active {
+      transform: translateY(0);
+      box-shadow: 0 10px 18px rgba(56, 189, 248, 0.4);
+      filter: brightness(0.98);
+    }
+
+    .button-row span.note {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* Right: results */
+
+    .results-card {
+      background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.18), transparent 55%),
+                  radial-gradient(circle at bottom left, rgba(30, 64, 175, 0.28), transparent 55%),
+                  #020617;
+      border-radius: var(--radius-xl);
+      padding: 18px 18px 20px;
+      border: 1px solid rgba(59, 130, 246, 0.45);
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.85);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .results-card::before {
+      content: "";
+      position: absolute;
+      inset: -30%;
+      opacity: 0.35;
+      background: conic-gradient(
+        from 180deg,
+        rgba(56, 189, 248, 0.05),
+        rgba(59, 130, 246, 0.35),
+        rgba(59, 130, 246, 0.1),
+        rgba(56, 189, 248, 0.4),
+        rgba(56, 189, 248, 0.05)
+      );
+      mix-blend-mode: soft-light;
+      pointer-events: none;
+    }
+
+    .results-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .results-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .results-header h2 {
+      font-size: 1rem;
+      margin: 0;
+    }
+
+    .tag {
+      font-size: 0.7rem;
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(191, 219, 254, 0.7);
+      color: #bfdbfe;
+      background: rgba(15, 23, 42, 0.7);
+      white-space: nowrap;
+    }
+
+    .results-muted {
+      font-size: 0.8rem;
+      color: rgba(209, 213, 219, 0.85);
+      margin-bottom: 10px;
+    }
+
+    .metrics {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(31, 41, 55, 0.9);
+      font-size: 0.85rem;
+    }
+
+    .metric-row.main {
+      background: rgba(8, 47, 73, 0.75);
+      border-color: rgba(56, 189, 248, 0.7);
+    }
+
+    .metric-label {
+      color: rgba(209, 213, 219, 0.95);
+    }
+
+    .metric-value {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #e5f5ff;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .metric-value.big {
+      font-size: 1.1rem;
+    }
+
+    .metric-caption {
+      font-size: 0.7rem;
+      color: rgba(148, 163, 184, 0.9);
+      margin-top: 2px;
+    }
+
+    .disclaimer {
+      margin-top: 12px;
+      font-size: 0.7rem;
+      color: rgba(148, 163, 184, 0.9);
+      line-height: 1.4;
+    }
+
+    footer {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-align: right;
+      margin-top: 4px;
+    }
+
+    .pill-icp {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      color: rgba(209, 213, 219, 0.9);
+      background: rgba(15, 23, 42, 0.8);
+    }
+
+    .dim {
+      opacity: 0.55;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>LevAI ROI Calculator</h1>
+      <p>Use your own numbers to see how an AI-driven outbound system could pay for itself.</p>
+      <p>LevAI generates <strong>qualified positive replies</strong>. Your team turns those into meetings and customers.</p>
+    </header>
+
+    <main class="layout">
+      <!-- LEFT: Inputs -->
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Your numbers</h2>
+        </div>
+
+        <form id="roiForm">
+          <div class="field-group">
+            <div class="field">
+              <label for="currency">
+                Currency
+              </label>
+              <select id="currency">
+                <option value="USD" selected>USD</option>
+                <option value="EUR">EUR</option>
+                <option value="GBP">GBP</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="avgDeal">
+                Avg deal value
+                <span class="hint">first 12 months</span>
+              </label>
+              <input id="avgDeal" type="number" min="0" step="100" placeholder="10000" />
+              <small>What one new client is worth to you over the first year.</small>
+            </div>
+
+            <div class="field">
+              <label for="closeRate">
+                Close rate from meeting → customer
+                <span class="hint">%</span>
+              </label>
+              <input id="closeRate" type="number" min="0" max="100" step="1" placeholder="20" />
+              <small>Out of 10 first calls with good-fit prospects, how many usually become customers?</small>
+            </div>
+
+            <div class="field">
+              <label for="positiveReplies">
+                Positive replies per month
+                <span class="hint">scenario</span>
+              </label>
+              <input id="positiveReplies" type="number" min="0" step="1" placeholder="20" />
+              <small>Scenario for how many interested replies LevAI generates per month.</small>
+            </div>
+
+            <div class="field">
+              <label for="replyToMeeting">
+                % of positive replies that become meetings
+                <span class="hint">%</span>
+              </label>
+              <input id="replyToMeeting" type="number" min="0" max="100" step="1" value="50" />
+              <small>e.g. if half of interested replies turn into booked calls → 50%.</small>
+            </div>
+
+            <div class="field">
+              <label for="fee">
+                LevAI monthly fee
+              </label>
+              <input id="fee" type="number" min="0" step="100" value="2000" />
+              <small>Your LevAI fee for this scenario.</small>
+            </div>
+
+            <div class="field row-full">
+              <label for="months">
+                Engagement length
+                <span class="hint">months</span>
+              </label>
+              <input id="months" type="number" min="1" step="1" value="3" />
+              <small>How long you want to model LevAI running (e.g. 3–6 months).</small>
+            </div>
+          </div>
+
+          <div class="button-row">
+            <button type="submit" class="primary">
+              <span>Run the scenario</span>
+              <span>→</span>
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- RIGHT: Results -->
+      <section class="results-card">
+        <div class="results-inner">
+          <div class="results-header">
+            <h2>What this could look like</h2>
+            <span class="tag">Model using your numbers</span>
+          </div>
+          <div class="results-muted" id="resultsIntro">
+            Enter their numbers on the left, hit <strong>Run the scenario</strong>, and walk through the impact live.
+          </div>
+
+          <div class="metrics" id="metricsBlock" style="display:none;">
+            <div class="metric-row">
+              <div>
+                <div class="metric-label">Estimated meetings per month</div>
+                <div class="metric-caption">From positive replies → meetings at your follow-up rate</div>
+              </div>
+              <div class="metric-value" id="outMeetings">–</div>
+            </div>
+
+            <div class="metric-row">
+              <div>
+                <div class="metric-label">Estimated new customers per month</div>
+                <div class="metric-caption">Meetings × your close rate</div>
+              </div>
+              <div class="metric-value" id="outCustomers">–</div>
+            </div>
+
+            <div class="metric-row main">
+              <div>
+                <div class="metric-label">Estimated new revenue per month</div>
+                <div class="metric-caption">New customers × your average deal value</div>
+              </div>
+              <div class="metric-value big" id="outRevenueMonth">–</div>
+            </div>
+
+            <div class="metric-row">
+              <div>
+                <div class="metric-label">Estimated new revenue over engagement</div>
+                <div class="metric-caption">Monthly revenue × months LevAI is running</div>
+              </div>
+              <div class="metric-value" id="outRevenueTotal">–</div>
+            </div>
+
+            <div class="metric-row">
+              <div>
+                <div class="metric-label">Clients needed per month to break even</div>
+                <div class="metric-caption">LevAI fee ÷ your average deal value</div>
+              </div>
+              <div class="metric-value" id="outBreakEven">–</div>
+            </div>
+
+            <div class="metric-row">
+              <div>
+                <div class="metric-label">Monthly revenue ROI multiple</div>
+                <div class="metric-caption">New revenue generated ÷ LevAI fee</div>
+              </div>
+              <div class="metric-value" id="outRoiMonth">–</div>
+            </div>
+
+            <div class="metric-row">
+              <div>
+                <div class="metric-label">Revenue ROI over engagement</div>
+                <div class="metric-caption">Total revenue generated ÷ total LevAI fees</div>
+              </div>
+              <div class="metric-value" id="outRoiTotal">–</div>
+            </div>
+          </div>
+
+          <div class="disclaimer">
+            These are <strong>estimates</strong>, not guarantees. LevAI generates qualified positive replies from your
+            ideal prospects; your actual results depend on your offer, follow-up speed and close rate.
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      LevAI · AI Outbound & Agent Systems
+    </footer>
+  </div>
+
+  <script>
+    function getNumber(id) {
+      const el = document.getElementById(id);
+      if (!el) return 0;
+      const raw = (el.value || "").toString().replace(/,/g, "");
+      const n = parseFloat(raw);
+      return isNaN(n) ? 0 : n;
+    }
+
+    function getCurrencySymbol(code) {
+      switch (code) {
+        case "EUR": return "€";
+        case "GBP": return "£";
+        case "USD": return "$";
+        default: return code + " ";
+      }
+    }
+
+    function formatCurrency(value, currencyCode) {
+      const symbol = getCurrencySymbol(currencyCode);
+      if (!isFinite(value)) return symbol + "0";
+      return symbol + new Intl.NumberFormat("en-US", {
+        maximumFractionDigits: 0
+      }).format(value);
+    }
+
+    function formatNumber(value, decimals) {
+      if (!isFinite(value)) return "0";
+      return value.toLocaleString("en-US", {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      });
+    }
+
+    document.getElementById("roiForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const currency = document.getElementById("currency").value || "USD";
+      const avgDeal = getNumber("avgDeal");
+      const closeRate = getNumber("closeRate") / 100;
+      const positiveReplies = getNumber("positiveReplies");
+      const replyToMeeting = getNumber("replyToMeeting") / 100;
+      const fee = getNumber("fee");
+      const months = getNumber("months") || 1;
+
+      const meetingsPerMonth = positiveReplies * replyToMeeting;
+      const customersPerMonth = meetingsPerMonth * closeRate;
+      const revenuePerMonth = customersPerMonth * avgDeal;
+      const revenueTotal = revenuePerMonth * months;
+
+      const breakEvenCustomersPerMonth = avgDeal > 0 ? fee / avgDeal : 0;
+      const roiMonth = fee > 0 ? revenuePerMonth / fee : 0;
+      const roiTotal = fee * months > 0 ? revenueTotal / (fee * months) : 0;
+
+      document.getElementById("outMeetings").textContent =
+        formatNumber(meetingsPerMonth, meetingsPerMonth < 10 ? 1 : 0);
+      document.getElementById("outCustomers").textContent =
+        formatNumber(customersPerMonth, customersPerMonth < 10 ? 1 : 0);
+      document.getElementById("outRevenueMonth").textContent =
+        formatCurrency(revenuePerMonth, currency);
+      document.getElementById("outRevenueTotal").textContent =
+        formatCurrency(revenueTotal, currency);
+      document.getElementById("outBreakEven").textContent =
+        formatNumber(breakEvenCustomersPerMonth, 2);
+      document.getElementById("outRoiMonth").textContent =
+        isFinite(roiMonth) && roiMonth > 0 ? formatNumber(roiMonth, 1) + "×" : "–";
+      document.getElementById("outRoiTotal").textContent =
+        isFinite(roiTotal) && roiTotal > 0 ? formatNumber(roiTotal, 1) + "×" : "–";
+
+      document.getElementById("resultsIntro").style.display = "none";
+      document.getElementById("metricsBlock").style.display = "flex";
+    });
+  </script>
+</body>
+</html>
