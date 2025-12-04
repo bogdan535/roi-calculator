@@ -2,9 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>LevAI ROI Calculator</title>
+  <title>LevAI Infrastructure Audit</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
+    /* Kept your original styling for consistency */
     :root {
       --bg: #0b1120;
       --card-bg: #020617;
@@ -12,9 +13,9 @@
       --border-subtle: #1f2937;
       --text-main: #e5e7eb;
       --text-muted: #9ca3af;
-      --accent: #38bdf8; /* tweak to match your button color if you want */
+      --accent: #38bdf8;
       --accent-soft: rgba(56, 189, 248, 0.1);
-      --danger: #f97373;
+      --success: #22c55e;
       --radius-lg: 16px;
       --radius-xl: 24px;
       --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.55);
@@ -66,9 +67,22 @@
       gap: 8px;
     }
 
+    header h1 span.badge {
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      color: var(--text-muted);
+    }
+
     header p {
       margin: 0;
       font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
+    .subline {
+      font-size: 0.85rem;
       color: var(--text-muted);
     }
 
@@ -178,6 +192,23 @@
       grid-column: 1 / -1;
     }
 
+    .divider {
+      grid-column: 1 / -1;
+      height: 1px;
+      background: rgba(51, 65, 85, 0.5);
+      margin: 8px 0;
+    }
+
+    .section-label {
+      grid-column: 1 / -1;
+      font-size: 0.75rem;
+      color: var(--accent);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
     .button-row {
       margin-top: 14px;
       display: flex;
@@ -213,11 +244,6 @@
       transform: translateY(0);
       box-shadow: 0 10px 18px rgba(56, 189, 248, 0.4);
       filter: brightness(0.98);
-    }
-
-    .button-row span.note {
-      font-size: 0.75rem;
-      color: var(--text-muted);
     }
 
     /* Right: results */
@@ -362,88 +388,73 @@
 <body>
   <div class="app">
     <header>
-      <h1>LevAI ROI Calculator</h1>
-      <p>Use your own numbers to see how an AI-driven outbound system could pay for itself.</p>
-      <p>LevAI generates <strong>qualified positive replies</strong>. Your team turns those into meetings and customers.</p>
+      <h1>LevAI Unit Economics Audit <span class="badge">Live</span></h1>
+      <p>Audit your client's LTV and calculate the potential ROI of the infrastructure.</p>
     </header>
 
     <main class="layout">
       <!-- LEFT: Inputs -->
       <section class="panel">
         <div class="panel-header">
-          <h2>Your numbers</h2>
+          <h2>Business Audit</h2>
+          <span class="pill">Inputs</span>
         </div>
 
         <form id="roiForm">
           <div class="field-group">
             <div class="field">
-              <label for="currency">
-                Currency
-              </label>
+              <label>Currency</label>
               <select id="currency">
                 <option value="USD" selected>USD</option>
                 <option value="EUR">EUR</option>
                 <option value="GBP">GBP</option>
               </select>
             </div>
+            
+            <div class="field">
+              <label>Engagement Length <span class="hint">Months</span></label>
+              <input id="months" type="number" min="1" value="6" />
+            </div>
+
+            <div class="section-label">Client Economics</div>
 
             <div class="field">
-              <label for="avgDeal">
-                Avg deal value
-                <span class="hint">first 12 months</span>
-              </label>
-              <input id="avgDeal" type="number" min="0" step="100" placeholder="10000" />
-              <small>What one new client is worth to you over the first year.</small>
+              <label>LTV (Deal Value) <span class="hint">Avg</span></label>
+              <input id="avgDeal" type="number" placeholder="15000" />
+              <small>Total lifetime value of one signed customer.</small>
             </div>
 
             <div class="field">
-              <label for="closeRate">
-                Close rate from meeting → customer
-                <span class="hint">%</span>
-              </label>
-              <input id="closeRate" type="number" min="0" max="100" step="1" placeholder="20" />
-              <small>Out of 10 first calls with good-fit prospects, how many usually become customers?</small>
+              <label>Close Rate <span class="hint">Qual Lead -> Deal</span></label>
+              <input id="closeRate" type="number" placeholder="20" />
+              <small>% of qualified leads that buy</small>
+            </div>
+
+            <div class="divider"></div>
+            <div class="section-label">LevAI Infrastructure Model</div>
+
+            <div class="field">
+              <label>Infrastructure Build Fee <span class="hint">One-time</span></label>
+              <input id="setupFee" type="number" value="3000" />
+              <small>cost to build private infrastructure & data</small>
             </div>
 
             <div class="field">
-              <label for="positiveReplies">
-                Positive replies per month
-                <span class="hint">scenario</span>
-              </label>
-              <input id="positiveReplies" type="number" min="0" step="1" placeholder="20" />
-              <small>Scenario for how many interested replies LevAI generates per month.</small>
+              <label>Cost Per Qual. Response <span class="hint">PPL</span></label>
+              <input id="costPerLead" type="number" value="200" placeholder="150" />
+              <small></small>
             </div>
 
-            <div class="field">
-              <label for="replyToMeeting">
-                % of positive replies that become meetings
-                <span class="hint">%</span>
-              </label>
-              <input id="replyToMeeting" type="number" min="0" max="100" step="1" value="50" />
-              <small>e.g. if half of interested replies turn into booked calls → 50%.</small>
-            </div>
-
-            <div class="field">
-              <label for="fee">
-                LevAI monthly fee
-              </label>
-              <input id="fee" type="number" min="0" step="100" value="2000" />
-              <small>Your LevAI fee for this scenario.</small>
-            </div>
-
-            <div class="field row-full">
-              <label for="months">
-                Engagement length
-                <span class="hint">months</span>
-              </label>
-              <input id="months" type="number" min="1" step="1" value="3" />
-              <small>How long you want to model LevAI running (e.g. 3–6 months).</small>
+            <div class="field" style="grid-column: 1 / -1;">
+              <label>Projected Volume <span class="hint">Qualified Replies / Mo</span></label>
+              <input id="leadVolume" type="number" value="20" />
+              <small>How many interested leads can they handle per month?</small>
             </div>
           </div>
 
           <div class="button-row">
             <button type="submit" class="primary">
-              <span>Run the scenario</span>
+              <span>Calculate Unit Economics</span>
               <span>→</span>
             </button>
           </div>
@@ -454,152 +465,127 @@
       <section class="results-card">
         <div class="results-inner">
           <div class="results-header">
-            <h2>What this could look like</h2>
-            <span class="tag">Model using your numbers</span>
+            <h2>Profitability Forecast</h2>
+            <span class="tag">PPL Model</span>
           </div>
-          <div class="results-muted" id="resultsIntro">
-            Enter their numbers on the left, hit <strong>Run the scenario</strong>, and walk through the impact live.
-          </div>
-
+          
           <div class="metrics" id="metricsBlock" style="display:none;">
-            <div class="metric-row">
-              <div>
-                <div class="metric-label">Estimated meetings per month</div>
-                <div class="metric-caption">From positive replies → meetings at your follow-up rate</div>
-              </div>
-              <div class="metric-value" id="outMeetings">–</div>
-            </div>
-
-            <div class="metric-row">
-              <div>
-                <div class="metric-label">Estimated new customers per month</div>
-                <div class="metric-caption">Meetings × your close rate</div>
-              </div>
-              <div class="metric-value" id="outCustomers">–</div>
-            </div>
-
+            
+            <!-- Value of a Lead -->
             <div class="metric-row main">
               <div>
-                <div class="metric-label">Estimated new revenue per month</div>
-                <div class="metric-caption">New customers × your average deal value</div>
+                <div class="metric-label">Value of ONE Qualified Lead</div>
+                <div class="metric-caption">LTV × Close Rate</div>
               </div>
-              <div class="metric-value big" id="outRevenueMonth">–</div>
+              <div class="metric-value big" id="valPerLead">–</div>
+            </div>
+
+            <!-- Cost vs Value -->
+            <div class="metric-row">
+              <div>
+                <div class="metric-label">Your Cost Per Lead</div>
+                <div class="metric-caption">LevAI Performance Fee</div>
+              </div>
+              <div class="metric-value" id="outCostPerLead" style="color: var(--accent);">–</div>
             </div>
 
             <div class="metric-row">
               <div>
-                <div class="metric-label">Estimated new revenue over engagement</div>
-                <div class="metric-caption">Monthly revenue × months LevAI is running</div>
+                <div class="metric-label">Upside Retained</div>
+                <div class="metric-caption">Value - Cost</div>
               </div>
-              <div class="metric-value" id="outRevenueTotal">–</div>
+              <div class="metric-value" id="outUpside" style="color: var(--success);">–</div>
+            </div>
+
+            <div class="divider" style="opacity:0.3;"></div>
+
+            <!-- Total Campaign -->
+            <div class="metric-row">
+              <div>
+                <div class="metric-label">Total Pipeline Value</div>
+                <div class="metric-caption">Total Leads × Lead Value</div>
+              </div>
+              <div class="metric-value" id="outTotalRevenue">–</div>
             </div>
 
             <div class="metric-row">
               <div>
-                <div class="metric-label">Clients needed per month to break even</div>
-                <div class="metric-caption">LevAI fee ÷ your average deal value</div>
+                <div class="metric-label">Est. Total Cost</div>
+                <div class="metric-caption">Build Fee + (Leads × PPL)</div>
               </div>
-              <div class="metric-value" id="outBreakEven">–</div>
+              <div class="metric-value" id="outTotalCost">–</div>
+            </div>
+
+            <!-- NET PROFIT ROW (New) -->
+            <div class="metric-row main">
+              <div>
+                <div class="metric-label">Projected Net Profit</div>
+                <div class="metric-caption">Pipeline Value - Total Cost</div>
+              </div>
+              <div class="metric-value big" id="outNetProfit" style="color: var(--success);">–</div>
             </div>
 
             <div class="metric-row">
               <div>
-                <div class="metric-label">Monthly revenue ROI multiple</div>
-                <div class="metric-caption">New revenue generated ÷ LevAI fee</div>
+                <div class="metric-label">Total ROI</div>
+                <div class="metric-caption">Revenue / Investment</div>
               </div>
-              <div class="metric-value" id="outRoiMonth">–</div>
+              <div class="metric-value" id="outROI">–</div>
             </div>
 
-            <div class="metric-row">
-              <div>
-                <div class="metric-label">Revenue ROI over engagement</div>
-                <div class="metric-caption">Total revenue generated ÷ total LevAI fees</div>
-              </div>
-              <div class="metric-value" id="outRoiTotal">–</div>
-            </div>
           </div>
-
-          <div class="disclaimer">
-            These are <strong>estimates</strong>, not guarantees. LevAI generates qualified positive replies from your
-            ideal prospects; your actual results depend on your offer, follow-up speed and close rate.
+          
+          <div class="results-muted" id="resultsIntro">
+            Enter LTV and Close Rate to see the math.
           </div>
         </div>
       </section>
     </main>
-
-    <footer>
-      LevAI · AI Outbound & Agent Systems
-    </footer>
+    <footer>LevAI Infrastructure · Internal Audit Tool</footer>
   </div>
 
   <script>
-    function getNumber(id) {
-      const el = document.getElementById(id);
-      if (!el) return 0;
-      const raw = (el.value || "").toString().replace(/,/g, "");
-      const n = parseFloat(raw);
-      return isNaN(n) ? 0 : n;
-    }
-
-    function getCurrencySymbol(code) {
-      switch (code) {
-        case "EUR": return "€";
-        case "GBP": return "£";
-        case "USD": return "$";
-        default: return code + " ";
-      }
-    }
-
-    function formatCurrency(value, currencyCode) {
-      const symbol = getCurrencySymbol(currencyCode);
-      if (!isFinite(value)) return symbol + "0";
-      return symbol + new Intl.NumberFormat("en-US", {
-        maximumFractionDigits: 0
-      }).format(value);
-    }
-
-    function formatNumber(value, decimals) {
-      if (!isFinite(value)) return "0";
-      return value.toLocaleString("en-US", {
-        minimumFractionDigits: decimals,
-        maximumFractionDigits: decimals
-      });
+    function getNum(id) { return parseFloat((document.getElementById(id).value || "").replace(/,/g, "")) || 0; }
+    function fmt(n, c) { 
+      const s = c === 'EUR' ? '€' : c === 'GBP' ? '£' : '$';
+      return s + n.toLocaleString("en-US", { maximumFractionDigits: 0 }); 
     }
 
     document.getElementById("roiForm").addEventListener("submit", function (e) {
       e.preventDefault();
+      const curr = document.getElementById("currency").value;
+      const ltv = getNum("avgDeal");
+      const closeRate = getNum("closeRate") / 100;
+      const setupFee = getNum("setupFee");
+      const costPerLead = getNum("costPerLead");
+      const monthlyVol = getNum("leadVolume");
+      const months = getNum("months");
 
-      const currency = document.getElementById("currency").value || "USD";
-      const avgDeal = getNumber("avgDeal");
-      const closeRate = getNumber("closeRate") / 100;
-      const positiveReplies = getNumber("positiveReplies");
-      const replyToMeeting = getNumber("replyToMeeting") / 100;
-      const fee = getNumber("fee");
-      const months = getNumber("months") || 1;
+      // Core Math
+      // 1. What is a lead worth? (LTV * Close Rate)
+      const valueOfLead = ltv * closeRate;
+      
+      // 2. What do they keep?
+      const upside = valueOfLead - costPerLead;
+      
+      // 3. Totals
+      const totalLeads = monthlyVol * months;
+      const totalLeadCost = totalLeads * costPerLead;
+      const totalInvestment = setupFee + totalLeadCost; // Includes Setup Fee!
+      const totalRevenue = totalLeads * valueOfLead;
+      const netProfit = totalRevenue - totalInvestment;
+      
+      const roi = totalInvestment > 0 ? (totalRevenue / totalInvestment) : 0;
 
-      const meetingsPerMonth = positiveReplies * replyToMeeting;
-      const customersPerMonth = meetingsPerMonth * closeRate;
-      const revenuePerMonth = customersPerMonth * avgDeal;
-      const revenueTotal = revenuePerMonth * months;
-
-      const breakEvenCustomersPerMonth = avgDeal > 0 ? fee / avgDeal : 0;
-      const roiMonth = fee > 0 ? revenuePerMonth / fee : 0;
-      const roiTotal = fee * months > 0 ? revenueTotal / (fee * months) : 0;
-
-      document.getElementById("outMeetings").textContent =
-        formatNumber(meetingsPerMonth, meetingsPerMonth < 10 ? 1 : 0);
-      document.getElementById("outCustomers").textContent =
-        formatNumber(customersPerMonth, customersPerMonth < 10 ? 1 : 0);
-      document.getElementById("outRevenueMonth").textContent =
-        formatCurrency(revenuePerMonth, currency);
-      document.getElementById("outRevenueTotal").textContent =
-        formatCurrency(revenueTotal, currency);
-      document.getElementById("outBreakEven").textContent =
-        formatNumber(breakEvenCustomersPerMonth, 2);
-      document.getElementById("outRoiMonth").textContent =
-        isFinite(roiMonth) && roiMonth > 0 ? formatNumber(roiMonth, 1) + "×" : "–";
-      document.getElementById("outRoiTotal").textContent =
-        isFinite(roiTotal) && roiTotal > 0 ? formatNumber(roiTotal, 1) + "×" : "–";
+      // Render
+      document.getElementById("valPerLead").textContent = fmt(valueOfLead, curr);
+      document.getElementById("outCostPerLead").textContent = fmt(costPerLead, curr);
+      document.getElementById("outUpside").textContent = fmt(upside, curr);
+      
+      document.getElementById("outTotalRevenue").textContent = fmt(totalRevenue, curr);
+      document.getElementById("outTotalCost").textContent = fmt(totalInvestment, curr);
+      document.getElementById("outNetProfit").textContent = fmt(netProfit, curr);
+      document.getElementById("outROI").textContent = roi.toFixed(1) + "x";
 
       document.getElementById("resultsIntro").style.display = "none";
       document.getElementById("metricsBlock").style.display = "flex";
